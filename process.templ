@@ -5,6 +5,13 @@ import (
 )
 
 func PackageOPF(ebookMiddle EBookMiddle) string {
+
+creator := ""
+
+if len(ebookMiddle.Meta.Authors) > 0 {
+	creator = ebookMiddle.Meta.Authors[0].Name
+} 
+
 str := fmt.Sprintf(`<package xmlns="http://www.idpf.org/2007/opf" xmlns:epub="http://www.idpf.org/2007/ops" version="3.0" xml:lang="en" unique-identifier="pub-id">
 			  	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
 			    <dc:coverage>Content Documents</dc:coverage>
@@ -29,12 +36,24 @@ str := fmt.Sprintf(`<package xmlns="http://www.idpf.org/2007/opf" xmlns:epub="ht
 			  <spine>
 			    <itemref idref="content_001"/>
 			  </spine>
-			</package>`, ebookMiddle.Meta.Authors[0].Name, ebookMiddle.Meta.Date, ebookMiddle.Meta.Language, ebookMiddle.Meta.Title)
+			</package>`, creator, ebookMiddle.Meta.Date, ebookMiddle.Meta.Language, ebookMiddle.Meta.Title)
 
 			return str
 }
 
+func pageName() string {
+	return "content_001.xhtml#"
+
+}
+
+func createSectionTitle(sectionTitle string) string {
+return pageName() + sectionTitle
+}
+
+
 templ Nav(ebookMiddle EBookMiddle) {
+
+
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en">
   <head>
     <title>{ebookMiddle.Meta.Title}</title>
@@ -43,6 +62,9 @@ templ Nav(ebookMiddle EBookMiddle) {
     <nav epub:type="toc">
       <ol>
         <li><a href="content_001.xhtml">Link to main page</a></li>
+				for _, sectionTitle := range ebookMiddle.Interior.SectionTitles {
+        	<li><a href={templ.URL(createSectionTitle(sectionTitle))}>{sectionTitleName(sectionTitle)}</a></li>
+				}
       </ol>
     </nav>
   </body>
@@ -57,6 +79,12 @@ templ Content(ebookMiddle EBookMiddle) {
 	@templ.Raw(ebookMiddle.Interior.Payload)
   </body>
 </html>
+}
+
+func Styles(ebookMiddle EBookMiddle) string {
+	return fmt.Sprintf(`.pagebreak {
+		margin: 1rem 0;
+	}`)
 }
 
 func ContainerXML(ebookMiddle EBookMiddle) string {

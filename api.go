@@ -26,7 +26,8 @@ type Meta struct {
 }
 
 type Interior struct {
-	Payload string `json:"payload"`
+	Payload       string   `json:"payload"`
+	SectionTitles []string `json:"sectionTitles"`
 }
 
 type EBookMiddle struct {
